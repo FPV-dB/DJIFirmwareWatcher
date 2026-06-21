@@ -29,15 +29,18 @@ public struct ReleaseNote: Codable, Hashable, Sendable {
 }
 
 public struct WatcherState: Codable, Sendable {
+    public var catalogVersion: Int?
     public var selectedProductIDs: Set<String>
     public var lastSeenByProductID: [String: ReleaseNote]
     public var lastChecked: Date?
 
     public init(
+        catalogVersion: Int? = 2,
         selectedProductIDs: Set<String> = [],
         lastSeenByProductID: [String: ReleaseNote] = [:],
         lastChecked: Date? = nil
     ) {
+        self.catalogVersion = catalogVersion
         self.selectedProductIDs = selectedProductIDs
         self.lastSeenByProductID = lastSeenByProductID
         self.lastChecked = lastChecked

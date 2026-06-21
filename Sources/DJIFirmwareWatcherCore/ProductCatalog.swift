@@ -24,6 +24,7 @@ public enum ProductCatalog {
         product("dji-mavic-4-pro", "DJI Mavic 4 Pro", "Consumer Drones - Mavic", "https://www.dji.com/downloads/products/mavic-4-pro"),
 
         product("dji-neo", "DJI Neo", "Consumer Drones - New Lines", "https://www.dji.com/neo/downloads"),
+        product("dji-neo-2", "DJI Neo 2", "Consumer Drones - New Lines", "https://www.dji.com/neo-2/downloads"),
         product("dji-flip", "DJI Flip", "Consumer Drones - New Lines", "https://www.dji.com/flip/downloads"),
         product("dji-lito-1", "DJI Lito 1", "Consumer Drones - New Lines", "https://www.dji.com/lito-1/downloads"),
         product("dji-lito-x1", "DJI Lito X1", "Consumer Drones - New Lines", "https://www.dji.com/lito-x1/downloads"),

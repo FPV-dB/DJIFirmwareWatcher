@@ -2,6 +2,13 @@ import Foundation
 import Testing
 @testable import DJIFirmwareWatcherCore
 
+@Test func catalogIncludesDJINeo2() {
+    let neo2 = ProductCatalog.products.first { $0.id == "dji-neo-2" }
+
+    #expect(neo2?.name == "DJI Neo 2")
+    #expect(neo2?.downloadsURL.absoluteString == "https://www.dji.com/neo-2/downloads")
+}
+
 @Test func parsesStructuredDJIReleaseNote() throws {
     let html = #"""
     <script>

@@ -22,8 +22,12 @@ final class WatcherManager: ObservableObject {
         var loaded = store.load()
         if !FileManager.default.fileExists(atPath: store.fileURL.path) {
             loaded.selectedProductIDs = Set(products.map(\.id))
+        } else if (loaded.catalogVersion ?? 1) < 2 {
+            loaded.selectedProductIDs.insert("dji-neo-2")
         }
+        loaded.catalogVersion = 2
         state = loaded
+        try? store.save(loaded)
         requestNotificationPermission()
         scheduleDailyChecks()
 
