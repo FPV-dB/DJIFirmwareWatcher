@@ -13,6 +13,10 @@ final class WatcherManager: ObservableObject {
 
     let products = ProductCatalog.products
 
+    var selectedProducts: [DJIProduct] {
+        products.filter(isSelected)
+    }
+
     private let store: JSONStateStore
     private let parser = ReleaseNoteParser()
     private var dailyTimer: Timer?
@@ -45,6 +49,16 @@ final class WatcherManager: ObservableObject {
             state.selectedProductIDs.insert(product.id)
         } else {
             state.selectedProductIDs.remove(product.id)
+        }
+        saveState()
+    }
+
+    func setSelected(_ selected: Bool, products: [DJIProduct]) {
+        let ids = Set(products.map(\.id))
+        if selected {
+            state.selectedProductIDs.formUnion(ids)
+        } else {
+            state.selectedProductIDs.subtract(ids)
         }
         saveState()
     }

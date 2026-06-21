@@ -15,5 +15,10 @@ struct DJIFirmwareWatcherApp: App {
                 .accessibilityLabel("DJI Firmware Watcher")
         }
         .menuBarExtraStyle(.window)
+
+        Window("Manage Models", id: "model-picker") {
+            ModelPickerWindow(manager: manager)
+        }
+        .defaultSize(width: 860, height: 680)
     }
 }

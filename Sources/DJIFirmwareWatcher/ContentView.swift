@@ -4,167 +4,110 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var manager: WatcherManager
+    @Environment(\.openWindow) private var openWindow
+
+    private var selectedProducts: [DJIProduct] {
+        manager.selectedProducts.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private var popoverHeight: CGFloat {
+        min(620, max(250, 190 + CGFloat(selectedProducts.count) * 58))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             header
             Divider()
-            productList
+
+            if selectedProducts.isEmpty {
+                emptyState
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(selectedProducts) { product in
+                            FirmwareStatusRow(product: product, manager: manager, showsCheckbox: false)
+                            Divider().padding(.leading, 12)
+                        }
+                    }
+                }
+            }
+
             Divider()
             footer
         }
-        .frame(width: 560, height: 720)
+        .frame(width: 430, height: popoverHeight)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("DJI Firmware Watcher", systemImage: "antenna.radiowaves.left.and.right")
-                    .font(.title2.weight(.semibold))
+                Text("DJI Firmware Watcher")
+                    .font(.headline)
                 Spacer()
-                Button {
-                    NSApp.terminate(nil)
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .help("Quit")
-            }
-
-            HStack {
-                Button(action: manager.checkNow) {
-                    Label(manager.isChecking ? "Checking..." : "Check Now", systemImage: "arrow.clockwise")
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(manager.isChecking)
-
                 if manager.isChecking {
                     ProgressView().controlSize(.small)
                 }
-
-                Spacer()
-                Button("All", action: manager.selectAll)
-                Button("None", action: manager.selectNone)
-            }
-
-            HStack {
-                Text(manager.statusMessage)
-                Spacer()
-                if let date = manager.state.lastChecked {
-                    Text("Last checked \(date.formatted(date: .abbreviated, time: .shortened))")
-                } else {
-                    Text("Not checked yet")
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-
-            Text("Checks selected products automatically once every 24 hours while the app is running.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .padding(14)
-    }
-
-    private var productList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 14, pinnedViews: [.sectionHeaders]) {
-                ForEach(ProductCatalog.categories, id: \.self) { category in
-                    Section {
-                        ForEach(manager.products.filter { $0.category == category }) { product in
-                            productRow(product)
-                        }
-                    } header: {
-                        Text(category)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 6)
-                            .background(.regularMaterial)
-                    }
-                }
-            }
-            .padding(.horizontal, 14)
-            .padding(.bottom, 12)
-        }
-    }
-
-    private func productRow(_ product: DJIProduct) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Toggle("", isOn: Binding(
-                get: { manager.isSelected(product) },
-                set: { manager.setSelected($0, product: product) }
-            ))
-            .labelsHidden()
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(product.name).fontWeight(.medium)
-                resultText(product)
-                    .font(.caption)
-                    .foregroundStyle(resultColor(product))
-                    .lineLimit(2)
-            }
-
-            Spacer(minLength: 8)
-
-            if manager.state.lastSeenByProductID[product.id] != nil {
                 Button {
-                    manager.openNewestRelease(for: product)
+                    NSApp.terminate(nil)
                 } label: {
-                    Image(systemName: "doc.richtext")
+                    Image(systemName: "power")
                 }
-                .buttonStyle(.borderless)
-                .help("Open newest release notes PDF")
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Quit DJI Firmware Watcher")
             }
 
-            Button {
-                manager.openDownloads(for: product)
-            } label: {
-                Image(systemName: "safari")
+            HStack(spacing: 8) {
+                Button(action: manager.checkNow) {
+                    Label(manager.isChecking ? "Checking…" : "Check Now", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(manager.isChecking || selectedProducts.isEmpty)
+
+                Button {
+                    openWindow(id: "model-picker")
+                    NSApp.activate(ignoringOtherApps: true)
+                } label: {
+                    Label("Manage Models…", systemImage: "slider.horizontal.3")
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderless)
-            .help("Open DJI downloads page")
+
+            Text(manager.statusMessage)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
-        .padding(.vertical, 3)
+        .padding(12)
     }
 
-    private func resultText(_ product: DJIProduct) -> Text {
-        guard let result = manager.results[product.id] else {
-            if let note = manager.state.lastSeenByProductID[product.id] {
-                return Text("Latest: \(note.date.formatted(date: .abbreviated, time: .omitted))")
+    private var emptyState: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "checklist.unchecked")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Text("Choose DJI products to watch.")
+                .font(.callout.weight(.medium))
+            Button("Manage Models…") {
+                openWindow(id: "model-picker")
+                NSApp.activate(ignoringOtherApps: true)
             }
-            return Text("Waiting to check")
         }
-
-        switch result {
-        case .found(let note, let isNew):
-            let prefix = isNew ? "NEW: " : "Latest: "
-            return Text(prefix + note.date.formatted(date: .abbreviated, time: .omitted))
-        case .noReleaseNotes:
-            return Text("No matching product release notes found")
-        case .failed(let message):
-            return Text(message)
-        }
-    }
-
-    private func resultColor(_ product: DJIProduct) -> Color {
-        guard let result = manager.results[product.id] else { return .secondary }
-        switch result {
-        case .found(_, let isNew): return isNew ? .green : .secondary
-        case .noReleaseNotes: return .orange
-        case .failed: return .red
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var footer: some View {
         HStack {
-            Text("Release-note history is stored locally on this Mac.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            if let date = manager.state.lastChecked {
+                Text("Checked \(date.formatted(date: .abbreviated, time: .shortened))")
+            } else {
+                Text("Not checked yet")
+            }
             Spacer()
-            Text("\(manager.state.selectedProductIDs.count) selected")
-                .font(.caption)
+            Text("\(selectedProducts.count) watched")
         }
-        .padding(12)
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .padding(10)
     }
 }
