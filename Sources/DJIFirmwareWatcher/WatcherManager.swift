@@ -29,6 +29,9 @@ final class WatcherManager: ObservableObject {
         } else if (loaded.catalogVersion ?? 1) < 2 {
             loaded.selectedProductIDs.insert("dji-neo-2")
         }
+        if loaded.lastAutomaticCheck == nil {
+            loaded.lastAutomaticCheck = loaded.lastChecked
+        }
         loaded.catalogVersion = 2
         state = loaded
         try? store.save(loaded)
@@ -74,7 +77,7 @@ final class WatcherManager: ObservableObject {
     }
 
     func checkNow() {
-        Task { await checkSelectedProducts() }
+        Task { await checkSelectedProducts(trigger: .manual) }
     }
 
     func openNewestRelease(for product: DJIProduct) {
@@ -87,9 +90,8 @@ final class WatcherManager: ObservableObject {
     }
 
     private func checkIfDailyCheckIsDue() async {
-        let interval: TimeInterval = 24 * 60 * 60
-        guard state.lastChecked.map({ Date().timeIntervalSince($0) >= interval }) ?? true else { return }
-        await checkSelectedProducts()
+        guard FirmwareCheckSchedule.isAutomaticCheckDue(lastAutomaticCheck: state.lastAutomaticCheck) else { return }
+        await checkSelectedProducts(trigger: .automatic)
     }
 
     private func scheduleDailyChecks() {
@@ -100,7 +102,7 @@ final class WatcherManager: ObservableObject {
         }
     }
 
-    private func checkSelectedProducts() async {
+    private func checkSelectedProducts(trigger: CheckTrigger) async {
         guard !isChecking else { return }
         let selected = products.filter(isSelected)
         guard !selected.isEmpty else {
@@ -167,7 +169,11 @@ final class WatcherManager: ObservableObject {
             }
         }
 
-        state.lastChecked = Date()
+        let checkedAt = Date()
+        state.lastChecked = checkedAt
+        if trigger == .automatic {
+            state.lastAutomaticCheck = checkedAt
+        }
         saveState()
         statusMessage = updateCount == 0 ? "No new release notes" : "Found \(updateCount) update\(updateCount == 1 ? "" : "s")"
     }
@@ -193,6 +199,11 @@ final class WatcherManager: ObservableObject {
         let request = UNNotificationRequest(identifier: product.id + note.pdfURL.absoluteString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
     }
+}
+
+private enum CheckTrigger {
+    case automatic
+    case manual
 }
 
 private enum CheckError: LocalizedError {

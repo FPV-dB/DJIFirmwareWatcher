@@ -60,7 +60,8 @@ import Testing
     let state = WatcherState(
         selectedProductIDs: ["dji-mini-4-pro"],
         lastSeenByProductID: ["dji-mini-4-pro": note],
-        lastChecked: date
+        lastChecked: date,
+        lastAutomaticCheck: date
     )
 
     try store.save(state)
@@ -69,4 +70,19 @@ import Testing
     #expect(loaded.selectedProductIDs == state.selectedProductIDs)
     #expect(loaded.lastSeenByProductID == state.lastSeenByProductID)
     #expect(loaded.lastChecked == state.lastChecked)
+    #expect(loaded.lastAutomaticCheck == state.lastAutomaticCheck)
+}
+
+@Test func automaticChecksAreDueOncePer24Hours() {
+    let now = Date(timeIntervalSince1970: 2_000_000_000)
+
+    #expect(FirmwareCheckSchedule.isAutomaticCheckDue(lastAutomaticCheck: nil, now: now))
+    #expect(!FirmwareCheckSchedule.isAutomaticCheckDue(
+        lastAutomaticCheck: now.addingTimeInterval(-(24 * 60 * 60) + 1),
+        now: now
+    ))
+    #expect(FirmwareCheckSchedule.isAutomaticCheckDue(
+        lastAutomaticCheck: now.addingTimeInterval(-(24 * 60 * 60)),
+        now: now
+    ))
 }

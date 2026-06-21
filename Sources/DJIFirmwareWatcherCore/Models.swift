@@ -33,17 +33,29 @@ public struct WatcherState: Codable, Sendable {
     public var selectedProductIDs: Set<String>
     public var lastSeenByProductID: [String: ReleaseNote]
     public var lastChecked: Date?
+    public var lastAutomaticCheck: Date?
 
     public init(
         catalogVersion: Int? = 2,
         selectedProductIDs: Set<String> = [],
         lastSeenByProductID: [String: ReleaseNote] = [:],
-        lastChecked: Date? = nil
+        lastChecked: Date? = nil,
+        lastAutomaticCheck: Date? = nil
     ) {
         self.catalogVersion = catalogVersion
         self.selectedProductIDs = selectedProductIDs
         self.lastSeenByProductID = lastSeenByProductID
         self.lastChecked = lastChecked
+        self.lastAutomaticCheck = lastAutomaticCheck
+    }
+}
+
+public enum FirmwareCheckSchedule {
+    public static let automaticInterval: TimeInterval = 24 * 60 * 60
+
+    public static func isAutomaticCheckDue(lastAutomaticCheck: Date?, now: Date = Date()) -> Bool {
+        guard let lastAutomaticCheck else { return true }
+        return now.timeIntervalSince(lastAutomaticCheck) >= automaticInterval
     }
 }
 
