@@ -12,6 +12,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcrun swift build -c re
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 install -m 755 "$BUILD_DIR/DJIFirmwareWatcher" "$APP/Contents/MacOS/DJIFirmwareWatcher"
+install -m 644 "$ROOT/Resources/DJIMenuBarIcon.png" "$APP/Contents/Resources/DJIMenuBarIcon.png"
 
 /usr/libexec/PlistBuddy -c 'Clear dict' "$APP/Contents/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c 'Add :CFBundleName string DJI Firmware Watcher' "$APP/Contents/Info.plist"

@@ -8,7 +8,11 @@ struct DJIFirmwareWatcherApp: App {
         MenuBarExtra {
             ContentView(manager: manager)
         } label: {
-            Label("DJI Firmware Watcher", systemImage: manager.isChecking ? "arrow.triangle.2.circlepath" : "airplane")
+            Image(nsImage: MenuBarIcon.image)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 26, height: 15)
+                .accessibilityLabel("DJI Firmware Watcher")
         }
         .menuBarExtraStyle(.window)
     }
