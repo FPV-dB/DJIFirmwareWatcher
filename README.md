@@ -91,3 +91,6 @@ scripts/build-app.sh              Application bundle build script
 ## Contributing
 
 Bug reports and focused pull requests are welcome. When reporting a missed release, include the DJI product name and its official downloads-page URL.
+## Hire / Contact
+
+FPV-dB is available for hire for macOS, SwiftUI, RF tooling, drone software, mapping, and field-operations utilities. For work enquiries, contact ex.dee.emm@gmail.com.
