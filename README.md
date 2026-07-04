@@ -5,6 +5,8 @@ DJI Firmware Watcher is a lightweight macOS menu-bar app that monitors official 
 > [!NOTE]
 > This is an independent community project. It is not affiliated with, endorsed by, or supported by DJI.
 
+![DJI Firmware Watcher status popover](docs/screenshots/status-popover-redacted.png)
+
 ## Features
 
 - Runs as a native macOS menu-bar app.
@@ -16,6 +18,14 @@ DJI Firmware Watcher is a lightweight macOS menu-bar app that monitors official 
 - Includes searchable, category-based model selection.
 - Stores preferences and check history locally.
 
+## Screenshots
+
+| Status popover | Model picker |
+| --- | --- |
+| ![Status popover screenshot](docs/screenshots/status-popover-redacted.png) | ![Model picker screenshot](docs/screenshots/model-picker-redacted.png) |
+
+Screenshots use representative sample product states. They do not expose private local state.
+
 ## How It Works
 
 On first launch, all catalogued products are selected. Open **Manage Models** to choose which products the app should watch.
@@ -23,6 +33,8 @@ On first launch, all catalogued products are selected. Open **Manage Models** to
 The first successful check establishes a local baseline. Later checks compare the newest matching release note with that baseline. A notification is sent only when the app finds a newer dated note or a different PDF for the same date.
 
 Some products share a downloads page, and some newly announced products may not yet have an individual public page. In those cases, the app reports the HTTP or matching status rather than treating it as an update.
+
+See [docs/USER_GUIDE.md](docs/USER_GUIDE.md) for a fuller walkthrough.
 
 ## Requirements
 
@@ -70,6 +82,8 @@ DJI Firmware Watcher does not require an account and does not upload personal da
 ```
 
 The state file contains selected product identifiers, the latest release notes seen, and check timestamps. Deleting it resets the app to its first-launch state.
+
+See [docs/PRIVACY.md](docs/PRIVACY.md) for more detail.
 
 ## Limitations
 
